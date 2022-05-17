@@ -343,6 +343,7 @@ static int xmp_create(const char *path, mode_t mode,
 		return -errno;
 
 	fi->fh = res;
+	fi->direct_io = 1;
 	return 0;
 }
 
@@ -356,6 +357,7 @@ static int xmp_open(const char *path, struct fuse_file_info *fi)
 		return -errno;
 
 	fi->fh = res;
+	fi->direct_io = 1;
 	return 0;
 }
 
@@ -368,8 +370,10 @@ static int xmp_read(const char *path, char *buf, size_t size, off_t offset,
 	char *absolute_path = convert_absolute_path(buffer, sizeof(buffer), path);
 
 	if (size + offset < DUMMY_SIZE) {
+		memset(buf, 0, size);
 		return size;
 	} else if (offset < DUMMY_SIZE) {
+		memset(buf, 0, size);
 		return DUMMY_SIZE - offset;
 	} else {
 		return 0;
